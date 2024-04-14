@@ -1,0 +1,55 @@
+{
+    "name": "molyuu",
+    "repos": {
+        "jupiter-staging": "https://steamdeck-packages.steamos.cloud/archlinux-mirror/$repo/os/x86_64",
+        "holo-staging": "https://steamdeck-packages.steamos.cloud/archlinux-mirror/$repo/os/x86_64"
+    },
+    "fetch_debug": true,
+    "fetch": {
+        "jupiter-staging": [
+            "jupiter-fan-control",
+            "lib32-libva-mesa-driver",
+            "lib32-mesa",
+            "lib32-mesa-vdpau",
+            "lib32-vulkan-mesa-layers",
+            "lib32-vulkan-radeon",
+            "libva-mesa-driver",
+            "linux-firmware-neptune",
+            "linux-neptune-61",
+            "linux-neptune-61-headers",
+            "mesa",
+            "mesa-vdpau",
+            "steamdeck-dsp",
+            "steamdeck-kde-presets",
+            "steam-im-modules",
+            "steam-jupiter-stable",
+            "steam_notif_daemon",
+            "vpower",
+            "vulkan-mesa-layers",
+            "vulkan-radeon",
+            "xorg-xwayland-jupiter"
+        ],
+        "holo-staging": [
+            "noise-suppression-for-voice-git",
+            "xone-dkms-git",
+            "xow-git"
+        ]
+    },
+    "build": {
+        "aur": [
+            "downgrade",
+            "gamescope-session-steam-git",
+            "lib32-gperftools",
+            "kanit-font",
+            "nintendo-udev",
+            "powerstation-bin",
+            "python-vdf",
+            "ryzenadj",
+            "steam-removable-media-git",
+            "zenergy-dkms-git"
+        ],
+        "local": [
+            "molyuuctl"
+        ]
+    }
+}
