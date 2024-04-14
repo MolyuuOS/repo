@@ -7,7 +7,12 @@
     "fetch_debug": true,
     "fetch": {
         "jupiter-staging": [
+            "bluez",
+            "bluez-plugins",
+            "bluez-utils",
+            "gamescope",
             "jupiter-fan-control",
+            "lib32-gamescope",
             "lib32-libva-mesa-driver",
             "lib32-mesa",
             "lib32-mesa-vdpau",
@@ -17,6 +22,7 @@
             "linux-firmware-neptune",
             "linux-neptune-61",
             "linux-neptune-61-headers",
+            "mangohud",
             "mesa",
             "mesa-vdpau",
             "steamdeck-dsp",
