@@ -55,7 +55,9 @@
             "zenergy-dkms-git"
         ],
         "local": [
-            "molyuuctl"
+            "molyuuctl",
+            "molyuuos-customizations",
+            "molyuu-updater"
         ]
     }
 }
