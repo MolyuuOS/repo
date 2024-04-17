@@ -224,6 +224,7 @@ class PackageGetter:
             bool: True if all packages were fetched successfully, False otherwise.
         """
         for name, repo in self.repos.items():
+            print("Fetching packages from repo " + name)
             package_list = self.manifest.get_packages(name)
 
             if package_list is None:
@@ -233,7 +234,8 @@ class PackageGetter:
                 package = package_list[package_idx]
                 print(
                     f"Fetching {package}...  [{package_idx + 1}/{package_list.__len__()}]")
-                repo.fetch_package(package, f"workspace/output")
+                if repo.fetch_package(package, f"workspace/output") is None:
+                    raise Exception(f"Package {package} not found!")
 
     def fetch_aur_packages_src(self) -> bool:
         """

@@ -1,8 +1,7 @@
 {
     "name": "molyuu",
     "repos": {
-        "jupiter-staging": "https://steamdeck-packages.steamos.cloud/archlinux-mirror/$repo/os/x86_64",
-        "holo-staging": "https://steamdeck-packages.steamos.cloud/archlinux-mirror/$repo/os/x86_64"
+        "jupiter-staging": "https://steamdeck-packages.steamos.cloud/archlinux-mirror/$repo/os/x86_64"
     },
     "fetch_debug": true,
     "fetch": {
@@ -10,6 +9,7 @@
             "bluez",
             "bluez-plugins",
             "bluez-utils",
+            "f3",
             "gamescope",
             "jupiter-fan-control",
             "lib32-gamescope",
@@ -25,6 +25,7 @@
             "mangohud",
             "mesa",
             "mesa-vdpau",
+            "powerbuttond",
             "steamdeck-dsp",
             "steamdeck-kde-presets",
             "steam-im-modules",
@@ -34,11 +35,6 @@
             "vulkan-mesa-layers",
             "vulkan-radeon",
             "xorg-xwayland-jupiter"
-        ],
-        "holo-staging": [
-            "noise-suppression-for-voice-git",
-            "xone-dkms-git",
-            "xow-git"
         ]
     },
     "build": {
@@ -50,6 +46,7 @@
             "powerstation-bin",
             "python-vdf",
             "ryzenadj",
+            "gamescope-session-git",
             "steam-removable-media-git",
             "zenergy-dkms-git"
         ],
