@@ -13,12 +13,6 @@
             "gamescope",
             "jupiter-fan-control",
             "lib32-gamescope",
-            "lib32-libva-mesa-driver",
-            "lib32-mesa",
-            "lib32-mesa-vdpau",
-            "lib32-vulkan-mesa-layers",
-            "lib32-vulkan-radeon",
-            "libva-mesa-driver",
             "linux-firmware-neptune",
             "linux-neptune-61",
             "linux-neptune-61-headers",
@@ -32,8 +26,6 @@
             "steam-jupiter-stable",
             "steam_notif_daemon",
             "vpower",
-            "vulkan-mesa-layers",
-            "vulkan-radeon",
             "xorg-xwayland-jupiter"
         ]
     },
