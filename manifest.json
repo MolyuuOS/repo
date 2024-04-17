@@ -44,7 +44,6 @@
     "build": {
         "aur": [
             "downgrade",
-            "gamescope-session-steam-git",
             "lib32-gperftools",
             "kanit-font",
             "nintendo-udev",
@@ -55,6 +54,7 @@
             "zenergy-dkms-git"
         ],
         "local": [
+            "gamescope-session-steam-git",
             "molyuuctl",
             "molyuuos-customizations",
             "molyuu-updater"
