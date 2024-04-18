@@ -15,6 +15,7 @@
             "jupiter-fan-control",
             "lib32-gamescope",
             "linux-firmware-neptune",
+            "linux-firmware-neptune-whence",
             "linux-neptune-61",
             "linux-neptune-61-headers",
             "mangohud",
@@ -41,8 +42,7 @@
             "ryzenadj",
             "gamescope-session-git",
             "steam-powerbuttond-git",
-            "steam-removable-media-git",
-            "zenergy-dkms-git"
+            "steam-removable-media-git"
         ],
         "local": [
             "gamescope-session-steam-git",
