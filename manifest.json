@@ -48,6 +48,15 @@
             "molyuuctl",
             "molyuuos-customizations",
             "molyuu-updater"
+        ],
+        "remote": [
+            {
+                "url": "https://github.com/ChimeraOS/mesa-chimeraos.git",
+                "PKGBUILDs": [
+                    "mesa/PKGBUILD",
+                    "lib32-mesa/PKGBUILD"
+                ]
+            }
         ]
     }
 }

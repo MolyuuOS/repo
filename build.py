@@ -92,14 +92,19 @@ class Repository:
 
         local_filename = url.split('/')[-1]
         # NOTE the stream=True parameter below
-        with requests.get(url, stream=True) as r:
-            r.raise_for_status()
-            with open(f"{path}/{local_filename}", 'wb') as f:
-                for chunk in r.iter_content(chunk_size=8192):
-                    # If you have chunk encoded response uncomment if
-                    # and set chunk_size parameter to None.
-                    # if chunk:
-                    f.write(chunk)
+        if os.getenv("MOLYUU_REPO_FETCH_VIA_WGET") == "1":
+            ret = os.system(f"wget {url} -O {path}/{local_filename}")
+            if ret != 0:
+                raise Exception(f"Failed to download {url}")
+        else:
+            with requests.get(url, stream=True) as r:
+                r.raise_for_status()
+                with open(f"{path}/{local_filename}", 'wb') as f:
+                    for chunk in r.iter_content(chunk_size=8192):
+                        # If you have chunk encoded response uncomment if
+                        # and set chunk_size parameter to None.
+                        # if chunk:
+                        f.write(chunk)
         return local_filename
 
     def refresh_database(self):
@@ -260,6 +265,37 @@ class PackageGetter:
 
         return True
 
+    def fetch_remote_packages_src(self) -> bool:
+        """
+        Fetches remote packages source code based on the build list from the manifest.
+
+        Returns:
+            bool: True if all remote packages were fetched successfully, False otherwise.
+        """
+        package_list = self.manifest.get_build_list("remote")
+        if package_list is None:
+            return False
+
+        for package_idx in range(0, package_list.__len__()):
+            package_def = package_list[package_idx]
+            remote_url = package_def["url"]
+
+            package = os.path.basename(remote_url).replace(".git", "")
+            if package == '':
+                package = os.path.basename(remote_url[:-1]).replace(".git", "")
+                if package == '':
+                    raise Exception(f"Invalid package URL: {remote_url}")
+
+            print(
+                f"Fetching {package}...  [{package_idx + 1}/{package_list.__len__()}]")
+            ret = os.system(
+                f"git clone {remote_url} workspace/build/{package}")
+            if ret != 0:
+                print(f"Package {package} failed to fetch.")
+                raise Exception(f"Package {package} failed to fetch.")
+
+        return True
+
     def prepare_local_src(self) -> bool:
         """
         Prepares local source packages for building.
@@ -285,11 +321,35 @@ class PackageGetter:
 
     def build_packages(self) -> bool:
         """
-        Builds and fetches packages from the local and AUR repositories based on the manifest.
+        Builds and fetches packages from the local, remote, and AUR repositories based on the manifest.
         """
         current_working_directory = os.getenv("PWD")
         self.fetch_aur_packages_src()
+        self.fetch_remote_packages_src()
         self.prepare_local_src()
+
+        if self.manifest.get_build_list("remote") is not None:
+            package_defs = self.manifest.get_build_list("remote")
+            for package_def_idx in range(0, package_defs.__len__()):
+                package_def = package_defs[package_def_idx]
+                remote_url = package_def["url"]
+                package = os.path.basename(remote_url).replace(".git", "")
+                if package == '':
+                    package = os.path.basename(remote_url[:-1]).replace(".git", "")
+                    if package == '':
+                        raise Exception(f"Invalid package URL: {remote_url}")
+                
+                pkgbuilds = package_def["PKGBUILDs"]
+                for pkgbuild in pkgbuilds:
+                    subpkg = os.path.dirname(pkgbuild)
+                    print(f"Building {package}::{subpkg}...  [{package_def_idx + 1}/{package_defs.__len__()}]")
+                    ret = os.system(f"cd workspace/build/{package}/{subpkg} && makepkg -s --noconfirm")
+                    if ret != 0:
+                        print(f"Package {package}::{subpkg} failed to build.")
+                        raise Exception(f"Package {package}::{subpkg} failed to build.")
+
+                    os.system(f"mv workspace/build/{package}/{subpkg}/*.pkg.tar.zst workspace/output")
+
         for src in ["local", "aur"]:
             package_list = self.manifest.get_build_list(src)
             if package_list is None:
