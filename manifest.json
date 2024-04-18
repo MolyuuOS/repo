@@ -11,6 +11,7 @@
             "bluez-utils",
             "f3",
             "gamescope",
+            "ibus-table-cangjie-lite",
             "jupiter-fan-control",
             "lib32-gamescope",
             "linux-firmware-neptune",
@@ -21,7 +22,6 @@
             "mesa-vdpau",
             "powerbuttond",
             "steamdeck-dsp",
-            "steamdeck-kde-presets",
             "steam-im-modules",
             "steam-jupiter-stable",
             "steam_notif_daemon",
@@ -32,6 +32,7 @@
     "build": {
         "aur": [
             "downgrade",
+            "ibus-pinyin",
             "lib32-gperftools",
             "kanit-font",
             "nintendo-udev",
@@ -47,7 +48,8 @@
             "gamescope-session-steam-git",
             "molyuuctl",
             "molyuuos-customizations",
-            "molyuu-updater"
+            "molyuu-updater",
+            "steamdeck-kde-presets"
         ],
         "remote": [
             {
