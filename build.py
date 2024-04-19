@@ -2,6 +2,7 @@ import json
 import os
 import re
 import requests
+import subprocess
 import hashlib
 import tarfile
 from typing import Optional, Tuple
@@ -51,6 +52,20 @@ class Manifest:
         if repo not in self.fetch:
             return None
         return list(self.fetch.get(repo))
+
+    def get_all_packages(self) -> Optional[list]:
+        """
+        Returns a list of all packages defined in manifest
+        """
+        result = []
+        
+        for _, v in self.fetch.items():
+            result = result + v
+
+        for _, v in self.build.items():
+            result = result + v
+
+        return result if result.__len__() > 0 else None
 
     def get_build_list(self, src_source: str) -> Optional[list]:
         """
@@ -200,6 +215,7 @@ class PackageGetter:
     def __init__(self, manifest: Manifest):
         self.repos = {}
         self.manifest = manifest
+        self.pacman_known_packages = subprocess.check_output("pacman -Slq", shell=True).decode("utf-8").split("\n")[:-1]
         self.init_repos()
 
     def init_repos(self) -> bool:
@@ -319,6 +335,80 @@ class PackageGetter:
 
         return True
 
+    def install_build_deps(self, pkgbuild_dir: str, top: bool = True):
+        """
+        Install the dependencies for a package located in the given `pkgbuild_dir`.
+
+        Parameters:
+            pkgbuild_dir (str): The path to the directory containing the package's PKGBUILD file.
+            top: Is this the top-level package? If so, we will copy related aur dependencies to ouput folder.
+
+        Raises:
+            Exception: If the dependencies for the package could not be installed.
+
+        Returns:
+            None
+        """
+        srcinfo = subprocess.check_output(f"cd {pkgbuild_dir} && makepkg --printsrcinfo", shell=True, text=True)
+        pkgbase = srcinfo.replace("\t", "").split("\n\n")[0]
+        depends = re.findall(r"^\s*depends = (.+)\n", pkgbase, re.MULTILINE)
+        makedepends = re.findall(r"^\s*makedepends = (.+)\n", pkgbase, re.MULTILINE)
+        checkdepends = re.findall(r"^\s*checkdepends = (.+)\n", pkgbase, re.MULTILINE)
+
+        unresolved_deps = None        
+        
+        try:
+            subprocess.check_output(f"pacman --color=always --deptest " + " ".join(depends + makedepends + checkdepends), shell=True, text=True)
+        except subprocess.CalledProcessError as e:
+            if e.returncode == 127:
+                unresolved_deps = e.output.split("\n")
+            else:
+                raise Exception(f"Failed to install dependencies for {pkgbuild_dir}.")
+
+        pacman_deps = []
+        aur_deps = []
+
+        if unresolved_deps != None:
+            for dep in unresolved_deps:
+                if dep == '':
+                    continue
+                if dep in self.pacman_known_packages:
+                    pacman_deps.append(dep)
+                else:
+                    aur_deps.append(dep)
+
+        # Install pacman dependencies
+        if len(pacman_deps) > 0:
+            print("Installing pacman build deps: " + " ".join(pacman_deps))
+            ret = os.system(f"sudo pacman -S --noconfirm " + " ".join(pacman_deps))
+            if ret != 0:
+                raise Exception(f"Failed to install dependencies for {pkgbuild_dir}.")
+            
+        # Install AUR dependencies
+        if len(aur_deps) > 0:
+            for dep in aur_deps:
+                result = json.loads(requests.get(f"https://aur.archlinux.org/rpc/?v=5&type=info&arg[]={dep}").content)
+                if result["resultcount"] == 0:
+                    raise Exception(f"Failed to install dependency: {dep} for {pkgbuild_dir}.")
+                else:
+                    matched = False
+                    for possible_match in result["results"]:
+                        if possible_match["Name"] == dep:
+                            matched = True
+                            ret = os.system(f"git clone https://aur.archlinux.org/{dep}.git workspace/build/{dep}")
+                            if ret != 0:
+                                raise Exception(f"Failed to install dependency: {dep} for {pkgbuild_dir}.")
+                            self.install_build_deps(f"workspace/build/{dep}", False)
+                            ret = os.system(f"cd workspace/build/{dep} && MAKEOPTS=\"-j$(nproc --all)\" makepkg -i --noconfirm")
+                            if ret != 0:
+                                raise Exception(f"Failed to install dependency: {dep} for {pkgbuild_dir}.")
+                            if (dep in depends) and (dep not in self.manifest.get_all_packages() and top):
+                                os.system(f"mv workspace/build/{dep}/*.pkg.tar.zst workspace/output/")
+                            break
+
+                    if not matched:
+                        raise Exception(f"Failed to install dependency: {dep} for {pkgbuild_dir}.")
+        
     def build_packages(self) -> bool:
         """
         Builds and fetches packages from the local, remote, and AUR repositories based on the manifest.
@@ -343,7 +433,8 @@ class PackageGetter:
                 for pkgbuild in pkgbuilds:
                     subpkg = os.path.dirname(pkgbuild)
                     print(f"Building {package}::{subpkg}...  [{package_def_idx + 1}/{package_defs.__len__()}]")
-                    ret = os.system(f"cd workspace/build/{package}/{subpkg} && makepkg -s --noconfirm")
+                    self.install_build_deps(f"workspace/build/{package}/{subpkg}")
+                    ret = os.system(f"cd workspace/build/{package}/{subpkg} && MAKEOPTS=\"-j$(nproc --all)\" makepkg --noconfirm")
                     if ret != 0:
                         print(f"Package {package}::{subpkg} failed to build.")
                         raise Exception(f"Package {package}::{subpkg} failed to build.")
@@ -359,8 +450,10 @@ class PackageGetter:
                 package = package_list[package_idx]
                 print(
                     f"Building {package}...  [{package_idx + 1}/{package_list.__len__()}]")
+
+                self.install_build_deps(f"workspace/build/{package}")
                 ret = os.system(
-                    f"cd workspace/build/{package} && PKGDEST={current_working_directory}/workspace/build/{package} pikaur -P PKGBUILD --noconfirm")
+                    f"cd workspace/build/{package} && MAKEOPTS=\"-j$(nproc --all)\" makepkg --noconfirm")
 
                 if ret != 0:
                     print(f"Package {package} failed to build.")
