@@ -40,16 +40,15 @@
             "powerstation-bin",
             "python-vdf",
             "ryzenadj",
-            "gamescope-session-git",
             "steam-powerbuttond-git",
             "steam-removable-media-git"
         ],
         "local": [
-            "gamescope-session-steam-git",
             "molyuuctl",
             "molyuuos-customizations",
             "molyuu-updater",
-            "steamdeck-kde-presets"
+            "steamdeck-kde-presets",
+            "steamdeck-plymouth-theme"
         ],
         "remote": [
             {
