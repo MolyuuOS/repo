@@ -1,0 +1,64 @@
+name: Build MolyuuOS Repository
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    container: 
+      image: archlinux:base-devel
+      options: --privileged
+
+    steps:
+    - name: Prepare environment
+      env: 
+        GPG_SIGNING_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+        GPG_PASSPHRASE: ${{ secrets.PASSPHRASE }}
+      run: |
+        pacman-key --init
+        pacman-key --populate archlinux
+        mkdir -p /etc/gnupg && echo "auto-key-retrieve" >> /etc/gnupg/gpg.conf
+        echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist\n" >> /etc/pacman.conf
+        pacman -Syu --noconfirm
+        pacman -S --noconfirm python python-mako python-requests base-devel libarchive git curl wget sudo bash arch-install-scripts
+        useradd -m -G wheel -s /bin/bash builder
+        echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+        echo $GPG_SIGNING_KEY | base64 --decode > gpg.key || true
+        echo $GPG_PASSPHRASE | sudo -u builder gpg --import gpg.key || true
+        rm gpg.key
+
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Build repository and build rootfs
+      env: 
+        GPG_PASSPHRASE: ${{ secrets.PASSPHRASE }}
+      run: |
+        chown -R builder:builder .
+        su builder -c "cd $PWD && mkdir -p workspace/output && echo 'Hello World' > workspace/output/hello.txt"
+        su builder -c "cd $PWD && echo $GPG_PASSPHRASE || gpg --detach-sign --pinentry-mode loopback --passphrase --passphrase-fd 0 --output workspace/output/hello.txt.gpg --sign workspace/output/hello.txt"
+
+    - name: "Get current date"
+      run: |
+        echo "builddate=$(date +'%Y.%m.%d')" >> $GITHUB_OUTPUT
+      id: date
+
+    - name: Create release and upload artifacts
+      id: upload-artifacts
+      continue-on-error: true
+      uses: ncipollo/release-action@v1
+      with:
+        artifactErrorsFailBuild: true
+        removeArtifacts: true
+        allowUpdates: true
+        generateReleaseNotes: true
+        tag: latest
+        name: ${{ steps.date.outputs.builddate }}
+        artifacts: "workspace/output/*"
+        body: |
+          MolyuuOS x86_64 repo packages
