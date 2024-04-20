@@ -20,6 +20,7 @@
             "linux-neptune-61-headers",
             "mangohud",
             "powerbuttond",
+            "steamos-devkit-service", 
             "steamdeck-dsp",
             "steam-im-modules",
             "steam-jupiter-stable",
