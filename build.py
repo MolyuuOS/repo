@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import sys
 import requests
 import subprocess
 import hashlib
@@ -465,7 +466,7 @@ class PackageGetter:
         return True
 
 
-def build_repository(name: str) -> bool:
+def build_repository(name: str, sign: bool = False, password: str = "") -> bool:
     """
     A function to build a repository with the given name.
 
@@ -475,11 +476,24 @@ def build_repository(name: str) -> bool:
     Returns:
         bool: True if the repository is built successfully, False otherwise.
     """
-    ret = os.system(
-        f"cd workspace/output && repo-add -n -R {name}.db.tar.xz *.pkg.tar.zst")
-    if ret != 0:
-        print(f"Repository {name} failed to build.")
-        raise Exception(f"Repository {name} failed to build.")
+    if sign and password != "":
+        # Sign the repository
+        ret = os.system(f"""
+                        cd workspace/output
+                        for i in *.pkg.tar.zst; do
+                            echo {password} | gpg --detach-sign --pinentry-mode loopback --passphrase --passphrase-fd 0 --output $i.sig --sign $i
+                        done
+                        repo-add --sign -n -R {name}.db.tar.xz *.pkg.tar.zst
+                        """)
+        if ret != 0:
+            print(f"Repository {name} failed to build.")
+            raise Exception(f"Repository {name} failed to build.")
+    else:
+        ret = os.system(
+            f"cd workspace/output && repo-add -n -R {name}.db.tar.xz *.pkg.tar.zst")
+        if ret != 0:
+            print(f"Repository {name} failed to build.")
+            raise Exception(f"Repository {name} failed to build.")
 
 
 def prepare_workspace():
@@ -493,7 +507,7 @@ def prepare_workspace():
     os.mkdir("workspace/output")
 
 
-def main():
+def main(sign: bool = False, password: str = ""):
     prepare_workspace()
     manifest = Manifest("manifest.json")
     manifest.load()
@@ -502,8 +516,12 @@ def main():
     package_getter.fetch_packages_from_repos()
     package_getter.build_packages()
 
-    build_repository(manifest.name)
+    build_repository(manifest.name, sign, password)
 
 
 if __name__ == "__main__":
-    main()
+    argv = sys.argv
+    if len(argv) == 3 and argv[1] == "--sign":
+        main(True, argv[2])
+    else:
+        main()
