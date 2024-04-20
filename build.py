@@ -481,7 +481,7 @@ def build_repository(name: str, sign: bool = False, password: str = "") -> bool:
         ret = os.system(f"""
                         cd workspace/output
                         for i in *.pkg.tar.zst; do
-                            echo {password} | gpg --detach-sign --pinentry-mode loopback --passphrase --passphrase-fd 0 --output $i.sig --sign $i
+                            gpg --batch --detach-sign --pinentry-mode loopback --passphrase {password} --output $i.sig --sign $i
                         done
                         repo-add --sign -n -R {name}.db.tar.xz *.pkg.tar.zst
                         """)
