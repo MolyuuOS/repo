@@ -476,6 +476,13 @@ def build_repository(name: str, sign: bool = False, password: str = "") -> bool:
     Returns:
         bool: True if the repository is built successfully, False otherwise.
     """
+    # Rename package with special characters
+    ret = os.system(
+        f"cd workspace/output && for i in *:*.pkg.tar.zst; do mv $i $(echo $i | sed 's/:/./g'); done")
+    if ret != 0:
+        print(f"Repository {name} failed to build.")
+        raise Exception(f"Repository {name} failed to build.")
+    
     if sign and password != "":
         # Sign the repository
         ret = os.system(f"""
