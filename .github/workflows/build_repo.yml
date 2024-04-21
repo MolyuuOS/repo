@@ -2,6 +2,8 @@ name: Build MolyuuOS Repository
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '0 20 * * *'
 
 jobs:
   build:
