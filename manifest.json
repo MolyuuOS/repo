@@ -19,7 +19,6 @@
             "linux-neptune-61",
             "linux-neptune-61-headers",
             "mangohud",
-            "powerbuttond",
             "steamos-devkit-service", 
             "steamdeck-dsp",
             "steam-im-modules",
@@ -39,13 +38,14 @@
             "powerstation-bin",
             "python-vdf",
             "ryzenadj",
-            "steam-powerbuttond-git",
             "steam-removable-media-git"
         ],
         "local": [
             "molyuuctl",
             "molyuuos-customizations",
+            "molyuuos-sddm-presets",
             "molyuu-updater",
+            "powerbuttond",
             "steamdeck-kde-presets",
             "steamdeck-plymouth-theme"
         ],
