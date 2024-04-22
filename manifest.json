@@ -44,6 +44,7 @@
             "molyuuctl",
             "molyuuos-customizations",
             "molyuuos-sddm-presets",
+            "molyuuos-lightdm-presets",
             "molyuu-updater",
             "powerbuttond",
             "steamdeck-kde-presets",
