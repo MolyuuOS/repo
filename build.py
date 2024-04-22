@@ -513,8 +513,17 @@ def prepare_workspace():
     os.mkdir("workspace/build")
     os.mkdir("workspace/output")
 
+def fetch_pkgbuilds():
+    if os.path.exists("local"):
+        os.system(f"rm -rf local")
+    
+    ret = os.system("git clone --recursive https://github.com/MolyuuOS/PKGBUILD.git local")
+    if ret != 0:
+        print("Failed to fetch PKGBUILDs.")
+        raise Exception("Failed to fetch PKGBUILDs.")
 
 def main(sign: bool = False, password: str = ""):
+    fetch_pkgbuilds()
     prepare_workspace()
     manifest = Manifest("manifest.json")
     manifest.load()
