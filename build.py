@@ -359,7 +359,14 @@ class PackageGetter:
         unresolved_deps = None        
         
         try:
-            subprocess.check_output(f"pacman --color=always --deptest " + " ".join(depends + makedepends + checkdepends), shell=True, text=True)
+            all_deps = []
+            for dep in depends + makedepends + checkdepends:
+                if re.search(r"(\w+)(?=[><=].*)", dep) == None:
+                    all_deps.append(dep)
+                else:
+                    all_deps.append(f"\"{dep}\"")
+            
+            subprocess.check_output(f"pacman --color=always --deptest " + " ".join(all_deps), shell=True, text=True)
         except subprocess.CalledProcessError as e:
             if e.returncode == 127:
                 unresolved_deps = e.output.split("\n")
