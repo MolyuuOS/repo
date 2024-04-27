@@ -6,6 +6,7 @@
     "fetch_debug": true,
     "fetch": {
         "jupiter-staging": [
+            "alsa-ucm-conf",
             "bluez",
             "bluez-plugins",
             "bluez-utils",
