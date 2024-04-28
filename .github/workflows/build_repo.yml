@@ -26,7 +26,7 @@ jobs:
         mkdir -p /etc/gnupg && echo "auto-key-retrieve" >> /etc/gnupg/gpg.conf
         echo -e "[multilib]\nInclude = /etc/pacman.d/mirrorlist\n" >> /etc/pacman.conf
         pacman -Syu --noconfirm
-        pacman -S --noconfirm python python-mako python-requests base-devel libarchive git curl wget sudo bash arch-install-scripts
+        pacman -S --noconfirm python python-mako python-requests python-distutils-extra base-devel libarchive git curl wget sudo bash arch-install-scripts
         useradd -m -G wheel -s /bin/bash builder
         echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
         echo $GPG_SIGNING_KEY | base64 --decode > gpg.key || true
