@@ -25,8 +25,7 @@
             "steam-im-modules",
             "steam-jupiter-stable",
             "steam_notif_daemon",
-            "vpower",
-            "xorg-xwayland-jupiter"
+            "vpower"
         ]
     },
     "build": {
@@ -49,7 +48,8 @@
             "molyuu-updater",
             "powerbuttond",
             "steamdeck-kde-presets",
-            "steamdeck-plymouth-theme"
+            "steamdeck-plymouth-theme",
+            "xorg-xwayland-jupiter"
         ],
         "remote": [
             {
