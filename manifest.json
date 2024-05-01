@@ -25,7 +25,8 @@
             "steam-im-modules",
             "steam-jupiter-stable",
             "steam_notif_daemon",
-            "vpower"
+            "vpower",
+            "wireplumber"
         ]
     },
     "build": {
